@@ -16,6 +16,7 @@ namespace TeamProject.Data
 
             var roles = Enum.GetNames<ERole>().Select(x => new IdentityRole(x.ToUpper()) { NormalizedName = roleManager.NormalizeKey(x.ToUpper()) });
             builder.HasData(roles);
+            
         }
     }
 }

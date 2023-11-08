@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TeamProject.Data;
 using TeamProject.Entity;
+using TeamProject.Entity.Enums;
 using TeamProject.Entity.LoginViewModel;
 using TeamProject.Entity.RegisterViewModel;
 
@@ -33,7 +34,7 @@ namespace TeamProject.Controllers
         
             if(!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = await _userManager.FindByEmailAsync(loginViewModel.Email);
+            var user = await _userManager.FindByNameAsync(loginViewModel.Username);
            
             if (user != null) {
 
@@ -90,7 +91,7 @@ namespace TeamProject.Controllers
 
             if (newUserResponse.Succeeded)
             {
-                await _userManager.AddToRoleAsync(newUser, "Admin");
+                await _userManager.AddToRoleAsync(newUser, (ERole.USER).ToString());
                 return Ok();
             }
             return BadRequest("Registration Failed");

@@ -76,7 +76,8 @@ if (args.Length == 1 && args[0].ToLower() == "seeddata")
 {
     await Seed.SeedUsersAndRolesAsync(app);
 
-    // dotnet run seeddata
+    //on console you have to run this command to seed data after migration and updating,
+    //    dotnet run seeddata
 }
 if (app.Environment.IsDevelopment())
 {

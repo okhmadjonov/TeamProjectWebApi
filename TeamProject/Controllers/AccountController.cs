@@ -49,14 +49,10 @@ namespace TeamProject.Controllers
                     var result = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password,  false, false);
                     if (result.Succeeded) {
 
-                        var verify = BCrypt.Net.BCrypt.Verify(loginViewModel.Password, user.PasswordHash);
-                        if (verify)
-                        {
+                     
                             string token = CreateTokenFromUser.CreateToken(user);
                             return Ok(token);
-                        }
-                        else throw new BadHttpRequestException("Wrong password");
-
+                      
                     }
 
                 }
@@ -69,41 +65,57 @@ namespace TeamProject.Controllers
             return Unauthorized("User not found");
 
         }
+
+
         // Registration
 
         [HttpPost]
         [Route("Registration")]
-        public async Task<IActionResult> Register( RegisterViewModel model)
+        public  async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user != null)
             {
-                
+                // User with this email already exists
                 return Conflict("User with this email already exists");
             }
 
+            // Create a new user with the provided credentials
+
             var newUser = new User()
             {
-
                 UserName = model.Username,
                 Email = model.Email,
                 PasswordHash = model.Password
-
             };
+
+            // Generate a salt and hash the password
+
             var userSalt = BCrypt.Net.BCrypt.GenerateSalt();
             var userPasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.PasswordHash, userSalt);
 
-            var newUserResponse = await _userManager.CreateAsync(newUser, userPasswordHash);
+            // Create the user in the database
 
+            var newUserResponse = await _userManager.CreateAsync(newUser, userPasswordHash);
             if (newUserResponse.Succeeded)
-            
+            {
+                // Add the user to the 'USER' role
+
                 await _userManager.AddToRoleAsync(newUser, (ERole.USER).ToString());
+
+                // Registration successful
                 return Ok();
-            
-           
+            }
+
+            // Registration failed
+            return BadRequest(newUserResponse.Errors);
         }
+
 
 
 

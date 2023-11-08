@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using TeamProject.AuthToken;
 using TeamProject.Data;
 using TeamProject.Entity;
 using TeamProject.Entity.Enums;
@@ -16,15 +17,14 @@ namespace TeamProject.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly AppDbContext _context;
+     
 
-
-        public AccountController(UserManager<User> userManager, AppDbContext appDbContext, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager,  SignInManager<User> signInManager)
         {
             _userManager = userManager;
-            _context = appDbContext;
+          
             _signInManager = signInManager;
-
+         
         }
 
 
@@ -37,7 +37,7 @@ namespace TeamProject.Controllers
         
             if(!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = await _userManager.FindByNameAsync(loginViewModel.Username);
+            var user = await _userManager.FindByEmailAsync(loginViewModel.Email);
            
             if (user != null) {
 
@@ -49,31 +49,31 @@ namespace TeamProject.Controllers
                     var result = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password,  false, false);
                     if (result.Succeeded) {
 
-                       
-                        return Ok();
+                        var verify = BCrypt.Net.BCrypt.Verify(loginViewModel.Password, user.PasswordHash);
+                        if (verify)
+                        {
+                            string token = CreateTokenFromUser.CreateToken(user);
+                            return Ok(token);
+                        }
+                        else throw new BadHttpRequestException("Wrong password");
+
                     }
-                
+
                 }
 
+  
                 // Password is Incorrrect
-
                 return Unauthorized("Password is Incorrect");
-            
             }
-
             // User not found
             return Unauthorized("User not found");
 
         }
-
-
-
-
         // Registration
 
         [HttpPost]
         [Route("Registration")]
-        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+        public async Task<IActionResult> Register( RegisterViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -89,9 +89,13 @@ namespace TeamProject.Controllers
 
                 UserName = model.Username,
                 Email = model.Email,
+                PasswordHash = model.Password
 
             };
-            var newUserResponse = await _userManager.CreateAsync(newUser, model.Password);
+            var userSalt = BCrypt.Net.BCrypt.GenerateSalt();
+            var userPasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.PasswordHash, userSalt);
+
+            var newUserResponse = await _userManager.CreateAsync(newUser, userPasswordHash);
 
             if (newUserResponse.Succeeded)
             

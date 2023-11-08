@@ -1,12 +1,17 @@
-﻿namespace TeamProject.Entity.LoginViewModel
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TeamProject.Entity.LoginViewModel
 {
     public class LoginViewModel
     {
 
-        public string Username { get; set; }
-        public string Password { get; set; }
-       
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
 
+        [Required]
+        [MinLength(6)]
+        public string Password  { get; set; }
 
     }
 }

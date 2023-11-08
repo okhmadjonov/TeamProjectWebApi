@@ -198,8 +198,8 @@ namespace TeamProject.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "15870bdd-4ed8-4819-ac8c-b4633c639b7a", null, "USER", "USER" },
-                    { "bf7ede94-7888-4841-98b5-bcc854922584", null, "ADMIN", "ADMIN" }
+                    { "962d3fb1-05f6-467b-83e3-d040ba65485d", null, "ADMIN", "ADMIN" },
+                    { "f82cd4c8-9d81-4c4b-b8de-d678bba89b12", null, "USER", "USER" }
                 });
 
             migrationBuilder.CreateIndex(

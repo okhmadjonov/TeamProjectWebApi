@@ -9,7 +9,9 @@ using TeamProject.Entity.RegisterViewModel;
 
 namespace TeamProject.Controllers
 {
- 
+
+    [Route("api/[controller]")]
+    [ApiController]
     public class AccountController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
@@ -29,6 +31,7 @@ namespace TeamProject.Controllers
         // Login
 
         [HttpPost]
+        [Route("Login")]
       
         public async Task<IActionResult> Login(LoginViewModel loginViewModel) { 
         
@@ -69,6 +72,7 @@ namespace TeamProject.Controllers
         // Registration
 
         [HttpPost]
+        [Route("Registration")]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -90,17 +94,18 @@ namespace TeamProject.Controllers
             var newUserResponse = await _userManager.CreateAsync(newUser, model.Password);
 
             if (newUserResponse.Succeeded)
-            {
+            
                 await _userManager.AddToRoleAsync(newUser, (ERole.USER).ToString());
                 return Ok();
-            }
-            return BadRequest("Registration Failed");
+            
+           
         }
 
 
 
         // Logout
         [HttpGet]
+        [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using TeamProject.AuthToken;
 using TeamProject.Data;
 using TeamProject.Entity;
@@ -32,46 +33,39 @@ namespace TeamProject.Controllers
 
         [HttpPost]
         [Route("Login")]
-      
-        public async Task<IActionResult> Login(LoginViewModel loginViewModel) { 
-        
-            if(!ModelState.IsValid) return BadRequest(ModelState);
+        public async Task<IActionResult> Login(LoginViewModel loginViewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
             var user = await _userManager.FindByEmailAsync(loginViewModel.Email);
-           
-            if (user != null) {
 
-                // User is found, check password
+            if (user != null)
+            {
+                byte[] storedPasswordHashBytes = Convert.FromBase64String(user.PasswordHash);
+                string decodedPasswordHash = Encoding.UTF8.GetString(storedPasswordHashBytes);
+                bool result = BCrypt.Net.BCrypt.Verify(loginViewModel.Password, decodedPasswordHash);
 
-                var passwordCheck = await _userManager.CheckPasswordAsync(user, loginViewModel.Password);
-                if (passwordCheck) {
 
-                    var result = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password,  false, false);
-                    if (result.Succeeded) {
-
-                     
-                            string token = CreateTokenFromUser.CreateToken(user);
-                            return Ok(token);
-                      
-                    }
-
+                if (result)
+                {
+                    // Password is correct
+                    var token = CreateTokenFromUser.CreateToken(user);
+                    return Ok(token);
                 }
-
-  
-                // Password is Incorrrect
-                return Unauthorized("Password is Incorrect");
             }
-            // User not found
-            return Unauthorized("User not found");
 
+            // Password is incorrect or user not found
+            return Unauthorized("Invalid login credentials");
         }
-
 
         // Registration
 
         [HttpPost]
         [Route("Registration")]
-        public  async Task<IActionResult> Register(RegisterViewModel model)
+        public   async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -86,26 +80,29 @@ namespace TeamProject.Controllers
             }
 
             // Create a new user with the provided credentials
-
             var newUser = new User()
             {
                 UserName = model.Username,
                 Email = model.Email,
-                PasswordHash = model.Password
+                //PasswordHash = model.Password
             };
 
-            // Generate a salt and hash the password
+            // Hash the password using BCrypt.Net.BCrypt.HashPassword()
+            string adminPassword = model.Password;
 
-            var userSalt = BCrypt.Net.BCrypt.GenerateSalt();
-            var userPasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.PasswordHash, userSalt);
+            // Initialize the inputKey with the adminPassword
+            string inputKey = adminPassword;
+            var salt = BCrypt.Net.BCrypt.GenerateSalt();
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(inputKey, salt);
+            var base64PasswordHash = Convert.ToBase64String(Encoding.UTF8.GetBytes(passwordHash));
 
-            // Create the user in the database
+            newUser.PasswordHash = base64PasswordHash;
 
-            var newUserResponse = await _userManager.CreateAsync(newUser, userPasswordHash);
+
+            var newUserResponse = await _userManager.CreateAsync(newUser);
             if (newUserResponse.Succeeded)
             {
                 // Add the user to the 'USER' role
-
                 await _userManager.AddToRoleAsync(newUser, (ERole.USER).ToString());
 
                 // Registration successful
@@ -115,8 +112,6 @@ namespace TeamProject.Controllers
             // Registration failed
             return BadRequest(newUserResponse.Errors);
         }
-
-
 
 
         // Logout

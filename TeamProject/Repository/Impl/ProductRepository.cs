@@ -36,7 +36,7 @@ namespace TeamProject.Repository.Impl
                 Name = productDto.Name,
                 Price = productDto.Price,
                 Quantity = productDto.Quantity,
-                ToTalPrice = (productDto.Quantity * productDto.Price) * (1 + Convert.ToDouble(vat))
+                ToTalPrice = CalculateTotalPrice(productDto.Quantity, productDto.Price)
             };
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
@@ -71,6 +71,13 @@ namespace TeamProject.Repository.Impl
                 _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public double CalculateTotalPrice(int quantity, double price)
+        {
+            var vat = _configuration["Vat"]!;
+
+            return (quantity * price) * (1 + Convert.ToDouble(vat));
         }
     }
 }

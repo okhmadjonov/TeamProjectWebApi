@@ -1,15 +1,11 @@
-﻿namespace TeamProject.Entity
+﻿namespace TeamProject.Dto
 {
-    public class Product
+    public class ProductDTO
     {
-        public int Id { get; set; }
-
         public string? Name { get; set; }
 
         public int Quantity { get; set; }
 
         public double Price { get; set; }
-
-        public double ToTalPrice { get; set; }
     }
 }

@@ -1,12 +1,26 @@
+<<<<<<< HEAD
 using Microsoft.AspNetCore.Hosting;
+=======
+using Microsoft.EntityFrameworkCore;
+>>>>>>> 93fddd9cca84fa8ea44c9808a8215e2de5616560
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TeamProject.Data;
 using TeamProject.Entity;
+using TeamProject.Repository;
+using TeamProject.Repository.Impl;
+using FluentValidation.AspNetCore;
+using FluentValidation;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddFluentValidationAutoValidation(o =>
+{
+    o.DisableDataAnnotationsValidation = false;
+});
+builder.Services.AddValidatorsFromAssembly(Assembly.GetAssembly(typeof(Program)));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -39,6 +53,8 @@ string[] { }
         }
     });
 });
+
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(builder.Environment.ContentRootPath)

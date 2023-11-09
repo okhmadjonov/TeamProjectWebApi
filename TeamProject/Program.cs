@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -63,10 +64,20 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 
 var app = builder.Build();
 
+
+using (var onescope = app.Services.CreateScope())
+{
+    // Directly access the IHost instance from the app object
+    var host = app; 
+    await Seed.SeedUsersAndRolesAsync(host);
+}
+
+/*
 if (args.Length == 1 && args[0].ToLower() == "seeddata")
 {
     await Seed.SeedUsersAndRolesAsync(app);
 }
+*/
 
 if (app.Environment.IsDevelopment())
 {
@@ -94,5 +105,8 @@ using
 
 var scope = app.Services.CreateScope();
 scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+
+
+
 
 app.Run();

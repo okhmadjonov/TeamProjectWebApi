@@ -8,8 +8,10 @@ namespace TeamProject.Data
 {
     public class Seed
     {
+         
         public static async Task SeedUsersAndRolesAsync(IApplicationBuilder applicationBuilder)
         {
+           
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
                 // Roles

@@ -50,13 +50,13 @@ namespace TeamProject.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8d96f393-7931-451c-afa5-6ff2ed734cd5",
+                            Id = "ab0b1f8c-6cba-4ac0-a274-8f74d849e6fc",
                             Name = "ADMIN",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "60fb167a-eb81-4ec7-8060-be8d1c3e8ef8",
+                            Id = "96ca377e-8283-4e15-b8ce-37a55f3b7612",
                             Name = "USER",
                             NormalizedName = "USER"
                         });
